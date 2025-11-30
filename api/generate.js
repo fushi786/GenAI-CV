@@ -1,7 +1,7 @@
 // client/api/generate.js
-const fetch = require("node-fetch");
+const fetch = require('node-fetch');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -20,7 +20,9 @@ export default async function handler(req, res) {
   }
 
   const { role, techStack, years, experienceDescription } = parsed;
-}
+
+  // ... keep your existing Gemini call code here, unchanged ...
+};
 
 
   if (!process.env.GEMINI_API_KEY) {
