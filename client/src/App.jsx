@@ -24,16 +24,17 @@ function App() {
     setSummary('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          role,
-          techStack,
-          years: Number(years),
-          experienceDescription
-        })
-      });
+const res = await fetch('/api/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    role,
+    techStack,
+    years: Number(years),
+    experienceDescription
+  })
+});
+
 
       if (!res.ok) throw new Error('Request failed');
 
