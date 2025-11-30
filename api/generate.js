@@ -5,23 +5,17 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 1) Read and parse body
-  let body = '';
-  for await (const chunk of req) {
-    body += chunk;
-  }
-
-  let parsed;
   try {
-    parsed = JSON.parse(body || '{}');
-  } catch (e) {
-    return res.status(400).json({ error: 'Invalid JSON body' });
-  }
+    // Read and parse JSON body
+    let body = '';
+    for await (const chunk of req) {
+      body += chunk;
+    }
 
-  const { role, techStack, years, experienceDescription } = parsed;
+    const parsed = JSON.parse(body || '{}');
+    const { role, techStack, years, experienceDescription } = parsed;
 
-  // 2) Build prompt
-  const prompt = `
+    const prompt = `
 You are a CV writing assistant.
 
 Generate:
@@ -37,55 +31,49 @@ Return ONLY valid JSON in this exact format:
 {"bullets": ["..."], "summary": "..."}
 `;
 
-  // 3) Call Gemini
-  const geminiRes = await fetch(
-    'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=' +
-      process.env.GEMINI_API_KEY,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      })
+    // Call Gemini
+    const geminiRes = await fetch(
+      'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=' +
+        process.env.GEMINI_API_KEY,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      }
+    );
+
+    if (!geminiRes.ok) {
+      const errorText = await geminiRes.text();
+      console.error('Gemini error:', errorText);
+      return res.status(500).json({ error: 'Gemini API call failed' });
     }
-  );
 
-  if (!geminiRes.ok) {
-    const errorText = await geminiRes.text();
-    console.error('Gemini error:', errorText);
-    return res.status(500).json({ error: 'Gemini API call failed' });
-  }
+    const geminiData = await geminiRes.json();
+    const text =
+      geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-  const geminiData = await geminiRes.json();
-  const text =
-    geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
 
-  const start = text.indexOf('{');
-  const end = text.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) {
+      console.error('Could not find JSON object in Gemini response:', text);
+      return res.json({
+        bullets: [text],
+        summary: ''
+      });
+    }
 
-  if (start === -1 || end === -1 || end <= start) {
-    console.error('Could not find JSON object in Gemini response:', text);
+    const jsonSlice = text.slice(start, end + 1);
+    const parsedJson = JSON.parse(jsonSlice);
+
     return res.json({
-      bullets: [text],
-      summary: ''
+      bullets: parsedJson.bullets || [],
+      summary: parsedJson.summary || ''
     });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
   }
-
-  const jsonSlice = text.slice(start, end + 1);
-
-  let parsedJson;
-  try {
-    parsedJson = JSON.parse(jsonSlice);
-  } catch (e) {
-    console.error('Failed to parse JSON from Gemini:', jsonSlice);
-    return res.json({
-      bullets: [text],
-      summary: ''
-    });
-  }
-
-  return res.json({
-    bullets: parsedJson.bullets || [],
-    summary: parsedJson.summary || ''
-  });
-}; // <-- make sure THIS is the final line of the file
+};  // ← this is the LAST line of the file
