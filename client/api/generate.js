@@ -1,6 +1,6 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -31,7 +31,6 @@ Return ONLY valid JSON in this exact format:
 {"bullets": ["..."], "summary": "..."}
 `;
 
-    // Call Gemini
     const geminiRes = await fetch(
       'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=' +
         process.env.GEMINI_API_KEY,
@@ -76,4 +75,4 @@ Return ONLY valid JSON in this exact format:
     console.error(err);
     return res.status(500).json({ error: 'Server error' });
   }
-};  // ← this is the LAST line of the file
+}
