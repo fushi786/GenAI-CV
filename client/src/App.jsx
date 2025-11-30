@@ -35,7 +35,6 @@ const res = await fetch('/api/generate', {
   })
 });
 
-
       if (!res.ok) throw new Error('Request failed');
 
       const data = await res.json();

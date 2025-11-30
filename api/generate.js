@@ -6,7 +6,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { role, techStack, years, experienceDescription } = req.body || {};
+  // Parse JSON body explicitly
+  let body = '';
+  for await (const chunk of req) {
+    body += chunk;
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(body || '{}');
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid JSON body' });
+  }
+
+  const { role, techStack, years, experienceDescription } = parsed;
+}
+
 
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({ error: 'GEMINI_API_KEY not set' });
@@ -84,4 +99,4 @@ Return ONLY valid JSON in this exact format:
     console.error(err);
     return res.status(500).json({ error: 'Server error' });
   }
-}
+
