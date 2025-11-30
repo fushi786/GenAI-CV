@@ -1,16 +1,55 @@
-# React + Vite
+TailorCV – GenAI CV Helper
+TailorCV is a small web app that helps generate tailored CV bullet points and a short professional summary from a user’s experience. It is built as a React single‑page app using Vite and calls a serverless API route that uses Google’s Gemini model to generate content.​
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Features
+Simple form to capture target role, tech stack/skills, years of experience, and a free‑text description.
 
-Currently, two official plugins are available:
+Generates ATS‑friendly bullet points plus a concise professional summary per request using Gemini.​
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Clean, dark UI with responsive layout and subtle product branding (TailorCV badge, footer version info).
 
-## React Compiler
+Deployed as a static frontend with a serverless API route on Vercel.​
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Tech stack
+Frontend: React + Vite, CSS.​
 
-## Expanding the ESLint configuration
+Backend/API: Vercel Serverless Function (/api/generate) implemented in Node.js with ES modules.​
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+AI model: Google Gemini (Generative Language API).
+
+Hosting: Vercel Hobby plan (free for personal projects).​
+
+Local development
+Install dependencies:
+
+bash
+cd client
+npm install
+Create a .env file in client:
+
+bash
+VITE_APP_NAME=TailorCV
+GEMINI_API_KEY=your_api_key_here
+Start the Vite dev server:
+
+bash
+npm run dev
+Open the printed http://localhost:5173 URL in the browser.
+
+Note: In production on Vercel, GEMINI_API_KEY is set as a project environment variable and consumed by the client/api/generate.js function.​
+
+Deployment
+The client folder is configured as the Vercel project root (Vite app).
+
+The client/api/generate.js file is deployed as the /api/generate serverless route.​
+
+Each push to the main branch triggers an automatic deploy on Vercel.​
+
+Future improvements
+Generalise from “tech stack” to “skills” so it works better for non‑tech roles (e.g. finance, operations).
+
+Support multiple work experience entries via optional sections or accordions.
+
+Generate a fully formatted CV layout and export as PDF for download.​
+
+Offer multiple CV templates that users can switch between before downloading.
